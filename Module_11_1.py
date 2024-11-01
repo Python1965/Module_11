@@ -53,11 +53,12 @@ def single_disp(data_df):
     # specific_mean = data_df.loc[:, ['A']].mean(axis='columns', numeric_only=True)
     # specific_mean = data_df.loc[:, ['A']].mean()
 
+    # data_lst = list(data_df.to_dict('list').values())
     data_dic = data_df.to_dict('list')
     data_lst = list(data_dic.values())
     number_of_groups = len(data_lst)
 
-    # Все группы тут
+    # Данные из всех групп одним списком
     all_groups = []
     for item in data_lst:
         all_groups += item
@@ -98,7 +99,7 @@ def single_disp(data_df):
     if P_value >= 0.05:
         return f"Мы не отклоняем нулевую гипотезу, так как P_value = {P_value}"
     else:
-        return (f"Мы отклоняем нулевую гипотезу, так как P value = {P_value}, гипотеза H1 верна,\n"
+        return (f"Мы отклоняем нулевую гипотезу, так как P_value = {P_value}. Гипотеза H1 верна,\n"
                 f"то есть как минимум 2 группы наблюдений различаются между собой в Генеральной совокупонсти")
 
 
