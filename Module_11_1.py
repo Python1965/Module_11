@@ -1,3 +1,4 @@
+
 # Домашнее задание по теме "Обзор сторонних библиотек Python"
 # ***************************************************************************************
 # Задача:
@@ -46,52 +47,45 @@ from scipy.stats import f
 import numpy as np
 import pandas as pd
 
-def single_disp(data):
+def single_disp(data_df):
 
-    # Выделяем группы для операции над данными
-    first_group = [i for i in data[1]]
-    second_group = [i for i in data[2]]
-    third_group = [i for i in data[3]]
-    fourth_group = [i for i in data[4]]
+    # mean_of_all_groups = data_df.mean(axis=[,'A',], kipna=True, numeric_only=True)
+    # specific_mean = data_df.loc[:, ['A']].mean(axis='columns', numeric_only=True)
+    # specific_mean = data_df.loc[:, ['A']].mean()
 
-    number_of_groups = len([first_group, second_group, third_group, fourth_group])
+    data_dic = data_df.to_dict('list')
+    data_lst = list(data_dic.values())
+    number_of_groups = len(data_lst)
 
     # Все группы тут
-    all_groups = first_group + second_group + third_group + fourth_group
+    all_groups = []
+    for item in data_lst:
+        all_groups += item
 
-    # среднее значение всей группы
+    # X__ - среднее значение всех наблюдений
     mean_of_all_groups = np.mean(all_groups)
 
-    # Общая изменчивость наших данных, здесь мы расчитали сумму всех квадратов отклонение от среднего
-    sum_of_squared_total = sum([(i - mean_of_all_groups) ** 2 for i in all_groups])
+    # SST - сумма всех квадратов отклонений от среднего для всех наблюдений
+    # (общая изменчивость данных)
+    sum_of_squared_total = sum([(item - mean_of_all_groups) ** 2 for item in all_groups])
 
-    # Число степеней свободы в SST
+    # dF для SST - Число степеней свободы для всех наблюдений
     df_of_sst = len(all_groups) - 1
 
-    # для расчета суммы квадратов  расчитаем сумму квадратов всех групп
-    mean1 = np.mean(first_group)
-    mean2 = np.mean(second_group)
-    mean3 = np.mean(third_group)
-    mean4 = np.mean(fourth_group)
-    ssw1 = sum([(i - mean1) ** 2 for i in first_group])
-    ssw2 = sum([(i - mean2) ** 2 for i in second_group])
-    ssw3 = sum([(i - mean3) ** 2 for i in third_group])
-    ssw4 = sum([(i - mean4) ** 2 for i in fourth_group ])
+    # SSW - сумма квадратов отклонений от среднего внутригрупповая
+    sum_of_squared_within = 0
+    for group in data_lst:
+        gr_mean = np.mean(group)
+        sum_of_squared_within += sum([(item - gr_mean) ** 2 for item in group])
 
-    # сумма квадратов внутригрупповая
-    sum_of_squared_within = ssw1 + ssw2 + ssw3 + ssw4
-
-    # Число степеней свободы внутригрупповое
+    # dF для SSW - число степеней свободы внутригрупповое
     df_of_ssw = len(all_groups) - number_of_groups
 
-    # Теперь узнаем на сколько наши групповые отклоняются от общегрупповых средних
-
-    # для вычета из каждой группы
-    for_minus_from_each_group = [first_group, second_group, third_group, fourth_group]
+    # SSB - Сумма квадратов межгрупповая
     sum_of_squared_between = \
-        sum([number_of_groups * (np.mean(i) - mean_of_all_groups) ** 2 for i in for_minus_from_each_group])
+        sum([len(item) * (np.mean(item) - mean_of_all_groups) ** 2 for item in data_lst])
 
-    # Число степеней свободы межгрупповое
+    #  dF для SSB -  Число степеней свободы межгрупповое
     df_of_ssb = number_of_groups - 1
 
     # Расчитаем F-значение, основной показатель дисперсионного анализа
@@ -104,12 +98,12 @@ def single_disp(data):
     if P_value >= 0.05:
         return f"Мы не отклоняем нулевую гипотезу, так как P_value = {P_value}"
     else:
-        return f"Мы отклоняем нулевую гипотезу, то есть P value = {P_value}, H1 верна то есть как минимум 2 группы данных различаются между собой в Генеральной совокупонсти"
+        return (f"Мы отклоняем нулевую гипотезу, так как P value = {P_value}, гипотеза H1 верна,\n"
+                f"то есть как минимум 2 группы наблюдений различаются между собой в Генеральной совокупонсти")
 
 
 if __name__ == '__main__':
 
-    dic_ALL = {}
     lst_A = []
     lst_B = []
     lst_C = []
@@ -126,12 +120,14 @@ if __name__ == '__main__':
             elif lst_tmp[1] == "C": lst_C.append(float(lst_tmp[0]))
             elif lst_tmp[1] == "D": lst_D.append(float(lst_tmp[0]))
 
-    dic_ALL[1] = lst_A
-    dic_ALL[2] = lst_B
-    dic_ALL[3] = lst_C
-    dic_ALL[4] = lst_D
+    dic_ALL = {}
+    dic_ALL["A"] = lst_A
+    dic_ALL["B"] = lst_B
+    dic_ALL["C"] = lst_C
+    dic_ALL["D"] = lst_D
 
     data = pd.DataFrame(dic_ALL)
 
     result = single_disp(data)
+    print()
     print(result)
