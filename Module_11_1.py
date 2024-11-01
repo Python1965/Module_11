@@ -47,56 +47,60 @@ from scipy.stats import f
 import numpy as np
 import pandas as pd
 
-def single_disp(data_df):
+def single_disp(data_df, P_level_of_significance = 0.05):
 
     # mean_of_all_groups = data_df.mean(axis=[,'A',], kipna=True, numeric_only=True)
     # specific_mean = data_df.loc[:, ['A']].mean(axis='columns', numeric_only=True)
     # specific_mean = data_df.loc[:, ['A']].mean()
 
-    # data_lst = list(data_df.to_dict('list').values())
-    data_dic = data_df.to_dict('list')
-    data_lst = list(data_dic.values())
+    # data_dic = data_df.to_dict('list')
+    # data_lst = list(data_dic.values())
+    data_lst = list(data_df.to_dict('list').values())
     number_of_groups = len(data_lst)
 
     # Данные из всех групп одним списком
-    all_groups = []
+    all_observ = []
     for item in data_lst:
-        all_groups += item
+        all_observ += item
 
     # X__ - среднее значение всех наблюдений
-    mean_of_all_groups = np.mean(all_groups)
+    mean_of_all_observ = np.mean(all_observ)
 
-    # SST - сумма всех квадратов отклонений от среднего для всех наблюдений
-    # (общая изменчивость данных)
-    sum_of_squared_total = sum([(item - mean_of_all_groups) ** 2 for item in all_groups])
+    # SST - Полная сумма квадратов (без какого-либо разбиения на группы)
+    # Характеризует общую изменчивость данных
+    sum_of_squared_total = sum([(item - mean_of_all_observ) ** 2 for item in all_observ])
 
-    # dF для SST - Число степеней свободы для всех наблюдений
-    df_of_sst = len(all_groups) - 1
+    # SSB - Межгрупповая сумма квадратов
+    sum_of_squared_between = \
+        sum([len(item) * (np.mean(item) - mean_of_all_observ) ** 2 for item in data_lst])
 
-    # SSW - сумма квадратов отклонений от среднего внутригрупповая
+    # SSW - Внутригрупповая сумма квадратов
     sum_of_squared_within = 0
     for group in data_lst:
         gr_mean = np.mean(group)
         sum_of_squared_within += sum([(item - gr_mean) ** 2 for item in group])
 
-    # dF для SSW - число степеней свободы внутригрупповое
-    df_of_ssw = len(all_groups) - number_of_groups
+    # dF для SST - Число степеней свободы для всех наблюдений
+    df_of_sst = len(all_observ) - 1
 
-    # SSB - Сумма квадратов межгрупповая
-    sum_of_squared_between = \
-        sum([len(item) * (np.mean(item) - mean_of_all_groups) ** 2 for item in data_lst])
-
-    #  dF для SSB -  Число степеней свободы межгрупповое
+    # dF1 для SSB -  Число степеней свободы межгрупповое
+    # или Первая степень свободы
     df_of_ssb = number_of_groups - 1
+
+    # dF2 для SSW - число степеней свободы внутригрупповое
+    # или Вторая степень свободы
+    df_of_ssw = len(all_observ) - number_of_groups
 
     # Расчитаем F-значение, основной показатель дисперсионного анализа
     F = (sum_of_squared_between / df_of_ssb) / (sum_of_squared_within / df_of_ssw)
 
-    # Расчитаем  вероятность истинности нулевой гипотезы
+    # С помощью данной функции мы преобразуем значение F-статистики,
+    # параметризованной правильными степенями свободы, в p-значение
+    # (расчитаем  вероятность истинности нулевой гипотезы)
     P_value = f.sf(F, df_of_ssb, df_of_ssw)
 
     # Обработаем полученный результат
-    if P_value >= 0.05:
+    if P_value >= P_level_of_significance:
         return f"Мы не отклоняем нулевую гипотезу, так как P_value = {P_value}"
     else:
         return (f"Мы отклоняем нулевую гипотезу, так как P_value = {P_value}. Гипотеза H1 верна,\n"
