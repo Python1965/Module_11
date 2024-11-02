@@ -58,7 +58,8 @@ def single_disp(data_df, P_level_of_significance = 0.05):
     data_lst = list(data_df.to_dict('list').values())
     number_of_groups = len(data_lst)
 
-    # Данные из всех групп одним списком
+    # Данные всех наблюдений одним списком
+    # (без какого-либо разбиения на группы)
     all_observ = []
     for item in data_lst:
         all_observ += item
@@ -104,7 +105,7 @@ def single_disp(data_df, P_level_of_significance = 0.05):
         return f"Мы не отклоняем нулевую гипотезу, так как P_value = {P_value}"
     else:
         return (f"Мы отклоняем нулевую гипотезу, так как P_value = {P_value}. Гипотеза H1 верна,\n"
-                f"то есть как минимум 2 группы наблюдений различаются между собой в Генеральной совокупонсти")
+                f"то есть как минимум 2 группы наблюдений различаются между собой в Генеральной совокупности")
 
 
 if __name__ == '__main__':
