@@ -14,10 +14,8 @@
 #
 # ****************************************************************************************
 
+import pandas as pd
 import inspect
-
-class MyClass:
-    pass
 
 def introspection_info(obj):
     type_ = type(obj).__name__
@@ -31,7 +29,7 @@ def introspection_info(obj):
 
 if __name__ == '__main__':
 
-    obj = MyClass()
+    obj = pd.DataFrame({1: [3, 1, 2], 2: [5, 3, 4], 3: [7, 6, 5]})
 
-    number_info = introspection_info(42)
+    number_info = introspection_info(obj)
     print(number_info)
